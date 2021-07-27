@@ -1,0 +1,30 @@
+.nav {
+  padding: 1.5%;
+  display: flex;
+  justify-content: space-around;
+  background-color: rgb(242, 96, 51);
+  color: white;
+}
+
+#tracker-btn {
+  border-width: 4px;
+  font-size: 125%;
+}
+
+.product-display {
+  border: 5px solid rgb(242, 96, 51);
+  border-radius: 15px;
+  width: 10vw;
+  height: 15vw;
+  margin-top: 2%;
+}
+
+.product-display img {
+  width: 100%;
+}
+
+.all-products {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
