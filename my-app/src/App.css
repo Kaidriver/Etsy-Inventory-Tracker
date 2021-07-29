@@ -14,13 +14,18 @@
 .product-display {
   border: 5px solid rgb(242, 96, 51);
   border-radius: 15px;
-  width: 10vw;
-  height: 15vw;
-  margin-top: 2%;
+  width: 75%;
+  margin: 0 auto;
+  padding: 5px;
 }
 
 .product-display img {
   width: 100%;
+  border-radius: 15px;
+}
+
+.product-display h3 {
+  font-size: 120%;
 }
 
 .all-products {
