@@ -33,3 +33,24 @@
   justify-content: space-between;
   flex-wrap: wrap;
 }
+
+.popup-wrapper {
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.2);
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: none;
+}
+
+.popup {
+  background-color: white;
+  width: 50%;
+  height: 600px;
+  margin: 0;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}

@@ -5,6 +5,7 @@ import Row from 'react-bootstrap/Row'
 import Col from 'react-bootstrap/Col'
 import ProductDisplay from './components/ProductDisplay.js'
 import NavbarHead from './components/NavbarHead.js'
+import CreatePopup from './components/CreatePopup.js'
 import 'bootstrap/dist/css/bootstrap.min.css';
 import pla from './images/pla.jpg'
 
@@ -12,6 +13,8 @@ function App() {
   return (
     <div>
       <NavbarHead/>
+      <CreatePopup/>
+      
       <Container>
         <Row className = "mt-4">
           <Col md={3}><ProductDisplay img = {pla} name = "Black Filament" qty = "3" date = "07/31/2020"/></Col>
