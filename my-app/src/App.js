@@ -9,6 +9,7 @@ import NavbarHead from './components/NavbarHead.js'
 import CreatePopup from './components/CreatePopup.js'
 import 'bootstrap/dist/css/bootstrap.min.css';
 import pla from './images/pla.jpg'
+import axios from "axios";
 import React from "react";
 
 class App extends React.Component {
@@ -17,17 +18,19 @@ class App extends React.Component {
     super(props)
 
     this.state = {
-      productList: [{"img": pla, "name": "Black Filament", "qty": "3", "date": "08/21/2021"}, {"img": pla, "name": "Black Filament", "qty": "3", "date": "08/21/2021"}, {"img": pla, "name": "Black Filament", "qty": "3", "date": "08/21/2021"}, {"img": pla, "name": "Black Filament", "qty": "3", "date": "08/21/2021"}, {"img": pla, "name": "Black Filament", "qty": "3", "date": "08/21/2021"}]
+      productList: [{"img": pla, "name": "Black Filament", "qty": "3", "date": "08/21/2021"}, {"img": pla, "name": "White Filament", "qty": "3", "date": "08/21/2021"}, {"img": pla, "name": "Red Filament", "qty": "3", "date": "08/21/2021"}, {"img": pla, "name": "Black Filament", "qty": "3", "date": "08/21/2021"}, {"img": pla, "name": "Black Filament", "qty": "3", "date": "08/21/2021"}],
+      productNames: []
     }
 
     this.renderProducts = this.renderProducts.bind(this)
-    this.test = this.test.bind(this)
+    this.addProduct = this.addProduct.bind(this)
+    this.deleteProduct = this.deleteProduct.bind(this)
   }
 
   renderProducts() {
     var products = []
     for (var i = 0; i < this.state.productList.length; i++) {
-      var product = <ProductDisplay key={i} img={pla} name = {this.state.productList[i].name} qty = {this.state.productList[i].qty} date = {this.state.productList[i].date} />
+      var product = <ProductDisplay id = {i} key={i} img={pla} name = {this.state.productList[i].name} qty = {this.state.productList[i].qty} date = {this.state.productList[i].date} delete = {this.deleteProduct} />
       products.push(product)
     }
 
@@ -40,22 +43,38 @@ class App extends React.Component {
     ));
   }
 
-  test() {
+  addProduct(product) {
     this.setState({
-       productList: this.state.productList.concat([{"img": pla, "name": "Black Filament", "qty": "3", "date": "08/21/2021"}])
+       productList: this.state.productList.concat([{"img": pla, "name": product.name, "qty": product.qty, "date": product.date}])
     })
   }
+
+  deleteProduct(index) {
+    this.setState({
+      productList: this.state.productList.filter((_, i) => i !== index)
+    })
+  }
+
   render() {
     return (
       <div>
         <NavbarHead/>
-        <CreatePopup/>
+        <CreatePopup add = {this.addProduct} productNames = {this.state.productNames}/>
 
         <Container>
           {this.renderProducts()}
         </Container>
       </div>
     );
+  }
+
+  componentDidMount() {
+    axios.get("http://localhost:5000/hooks/getProducts")
+      .then(response => {
+          this.setState({
+            productNames: response.data.map(product => product.title)
+          })
+      });
   }
 }
 

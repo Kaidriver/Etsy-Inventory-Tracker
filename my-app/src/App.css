@@ -60,11 +60,11 @@
   padding: 2%;
 }
 
-.popup-form {
+#popup-link, .popup-form {
   margin-bottom: 3%;
 }
 
-.popup svg {
+.product-display svg, .popup svg {
   float: right;
 }
 

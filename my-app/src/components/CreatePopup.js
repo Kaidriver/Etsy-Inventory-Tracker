@@ -6,15 +6,12 @@ import Button from 'react-bootstrap/Button'
 import ReactDOM from 'react-dom'
 
 const Hook = (props) => {
+  console.log(props.productNames)
   return (<Row>
     <Col md = {3}>
       <Form.Label>Product</Form.Label>
       <Form.Select class="form-control" id="hooks-select">
-        <option>1</option>
-        <option>2</option>
-        <option>3</option>
-        <option>4</option>
-        <option>5</option>
+        {props.productNames.map(product => <option>{product}</option>)}
       </Form.Select>
     </Col>
     <Col md = {3}>
@@ -57,6 +54,15 @@ export default class CreatePopup extends React.Component{
   }
 
   createTracker() {
+    var newTracker = {}
+    var fieldNames = ["name", "qty"]
+    var fieldValues = document.querySelectorAll('.popup-form')
+
+    for (var i = 0; i < fieldNames.length; i++) {
+      newTracker[fieldNames[i]] = fieldValues[i].value
+    }
+
+    this.props.add(newTracker)
     this.hidePopup()
   }
 
@@ -70,7 +76,7 @@ export default class CreatePopup extends React.Component{
     var hookList = []
 
     for (var i = 0; i < this.state.hooks; i++) {
-      hookList.push(<Hook key = {i}/>)
+      hookList.push(<Hook key = {i} productNames = {this.props.productNames}/>)
     }
 
     return hookList
@@ -96,7 +102,7 @@ export default class CreatePopup extends React.Component{
               </Col>
             </Row>
             <Form.Label>Amazon Link</Form.Label>
-            <Form.Control className = "popup-form" type="text" placeholder="Enter Link" />
+            <Form.Control id = "popup-link" type="text" placeholder="Enter Link" />
           </Form>
 
           <div class = "hooks-header">
