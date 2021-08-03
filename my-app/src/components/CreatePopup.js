@@ -4,6 +4,7 @@ import Row from 'react-bootstrap/Row'
 import Col from 'react-bootstrap/Col'
 import Button from 'react-bootstrap/Button'
 import ReactDOM from 'react-dom'
+import axios from "axios";
 
 const Hook = (props) => {
   console.log(props.productNames)
@@ -16,7 +17,7 @@ const Hook = (props) => {
     </Col>
     <Col md = {3}>
       <Form.Label>Loss per Order</Form.Label>
-      <Form.Control type="number" placeholder="Enter Number" />
+      <Form.Control type="number" placeholder="Enter Number" id="losses-select"/>
     </Col>
   </Row>)
 }
@@ -55,12 +56,22 @@ export default class CreatePopup extends React.Component{
 
   createTracker() {
     var newTracker = {}
-    var fieldNames = ["name", "qty"]
+    var fieldNames = ["name", "qty", 'link']
     var fieldValues = document.querySelectorAll('.popup-form')
 
     for (var i = 0; i < fieldNames.length; i++) {
       newTracker[fieldNames[i]] = fieldValues[i].value
     }
+
+    newTracker.hooks = Array.from(document.querySelectorAll('#hooks-select')).map(hook => hook.value)
+    newTracker.losses = Array.from(document.querySelectorAll('#losses-select')).map(loss => loss.value)
+
+    //temporary
+    newTracker.lastUpdated = '08/02/2021'
+    newTracker.date = '08/02/2021'
+
+    axios.post("http://localhost:5000/trackers/add", newTracker)
+      .then(res => newTracker._id = res.data)
 
     this.props.add(newTracker)
     this.hidePopup()
@@ -102,7 +113,7 @@ export default class CreatePopup extends React.Component{
               </Col>
             </Row>
             <Form.Label>Amazon Link</Form.Label>
-            <Form.Control id = "popup-link" type="text" placeholder="Enter Link" />
+            <Form.Control className = "popup-form" type="text" placeholder="Enter Link" />
           </Form>
 
           <div class = "hooks-header">

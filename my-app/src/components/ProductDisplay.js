@@ -24,7 +24,7 @@ export default class ProductDisplay extends React.Component {
           <img src = {this.props.img}/>
           <h3 class = "text-center">{this.props.name}</h3>
           <p>Qty: {this.props.qty}</p>
-          <p>Buy by: {this.props.qty}</p>
+          <p>Buy by: {this.props.date}</p>
         </div>
       </Col>
     )

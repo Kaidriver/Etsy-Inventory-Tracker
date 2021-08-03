@@ -18,7 +18,7 @@ class App extends React.Component {
     super(props)
 
     this.state = {
-      productList: [{"img": pla, "name": "Black Filament", "qty": "3", "date": "08/21/2021"}, {"img": pla, "name": "White Filament", "qty": "3", "date": "08/21/2021"}, {"img": pla, "name": "Red Filament", "qty": "3", "date": "08/21/2021"}, {"img": pla, "name": "Black Filament", "qty": "3", "date": "08/21/2021"}, {"img": pla, "name": "Black Filament", "qty": "3", "date": "08/21/2021"}],
+      productList: [],
       productNames: []
     }
 
@@ -45,11 +45,16 @@ class App extends React.Component {
 
   addProduct(product) {
     this.setState({
-       productList: this.state.productList.concat([{"img": pla, "name": product.name, "qty": product.qty, "date": product.date}])
+       productList: this.state.productList.concat([product])
     })
   }
 
   deleteProduct(index) {
+    axios.delete("http://localhost:5000/trackers/deleteTracker/" + this.state.productList[index]._id)
+      .then(response => {
+          console.log(response)
+      });
+
     this.setState({
       productList: this.state.productList.filter((_, i) => i !== index)
     })
@@ -75,6 +80,16 @@ class App extends React.Component {
             productNames: response.data.map(product => product.title)
           })
       });
+
+    axios.get("http://localhost:5000/trackers/getTrackers")
+      .then(response => {
+        this.setState({
+          productList: response.data
+        })
+
+
+                  console.log(response)
+      })
   }
 }
 

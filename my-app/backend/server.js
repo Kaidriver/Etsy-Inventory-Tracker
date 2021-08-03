@@ -19,10 +19,10 @@ connection.once('open', () => {
   console.log("MongoDB database connection established successfully");
 });
 
-// const trackersRouter = require('./routes/trackers')
+const trackersRouter = require('./routes/trackers')
 const hooksRouter = require('./routes/hooks')
-//
-// app.use('/trackers', trackersRouter)
+
+app.use('/trackers', trackersRouter)
 app.use('/hooks', hooksRouter)
 
 app.listen(port, () => {
