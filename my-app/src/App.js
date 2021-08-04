@@ -19,18 +19,20 @@ class App extends React.Component {
 
     this.state = {
       productList: [],
-      productNames: []
+      productNames: [],
+      selectedProduct: null
     }
 
     this.renderProducts = this.renderProducts.bind(this)
     this.addProduct = this.addProduct.bind(this)
     this.deleteProduct = this.deleteProduct.bind(this)
+    this.editProduct = this.editProduct.bind(this)
   }
 
   renderProducts() {
     var products = []
     for (var i = 0; i < this.state.productList.length; i++) {
-      var product = <ProductDisplay id = {i} key={i} img={pla} name = {this.state.productList[i].name} qty = {this.state.productList[i].qty} date = {this.state.productList[i].date} delete = {this.deleteProduct} />
+      var product = <ProductDisplay id = {i} key={i} img={pla} name = {this.state.productList[i].name} qty = {this.state.productList[i].qty} date = {this.state.productList[i].date} delete = {this.deleteProduct} edit = {this.editProduct}/>
       products.push(product)
     }
 
@@ -60,11 +62,19 @@ class App extends React.Component {
     })
   }
 
+  editProduct(index) {
+    this.setState({
+      selectedProduct: this.state.productList[index]
+    })
+
+    document.querySelector('.popup-wrapper').style.display = "initial"
+  }
+
   render() {
     return (
       <div>
         <NavbarHead/>
-        <CreatePopup add = {this.addProduct} productNames = {this.state.productNames}/>
+        <CreatePopup add = {this.addProduct} productNames = {this.state.productNames} selectedProduct = {this.state.selectedProduct}/>
 
         <Container>
           {this.renderProducts()}
@@ -86,9 +96,6 @@ class App extends React.Component {
         this.setState({
           productList: response.data
         })
-
-
-                  console.log(response)
       })
   }
 }

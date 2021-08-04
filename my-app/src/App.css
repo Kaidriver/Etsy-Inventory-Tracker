@@ -64,8 +64,14 @@
   margin-bottom: 3%;
 }
 
-.product-display svg, .popup svg {
+.popup svg {
   float: right;
+}
+
+.icons {
+  display: flex;
+  float: right;
+  justify-content: space-around;
 }
 
 .hooks {

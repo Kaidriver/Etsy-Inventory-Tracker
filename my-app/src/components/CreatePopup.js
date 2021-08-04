@@ -7,17 +7,16 @@ import ReactDOM from 'react-dom'
 import axios from "axios";
 
 const Hook = (props) => {
-  console.log(props.productNames)
   return (<Row>
     <Col md = {3}>
       <Form.Label>Product</Form.Label>
-      <Form.Select class="form-control" id="hooks-select">
+      <Form.Select class="form-control" id="hooks-select" value={props.selectedProduct != null ? props.selectedProduct.hooks[props.id] : ''}>
         {props.productNames.map(product => <option>{product}</option>)}
       </Form.Select>
     </Col>
     <Col md = {3}>
       <Form.Label>Loss per Order</Form.Label>
-      <Form.Control type="number" placeholder="Enter Number" id="losses-select"/>
+      <Form.Control type="number" placeholder="Enter Number" id="losses-select" value={props.selectedProduct != null ? props.selectedProduct.losses[props.id] : ''}/>
     </Col>
   </Row>)
 }
@@ -28,7 +27,8 @@ export default class CreatePopup extends React.Component{
     super(props)
 
     this.state = {
-      hooks: 1
+      hooks: 1,
+      edit: false
     }
 
     this.addHook = this.addHook.bind(this)
@@ -85,9 +85,13 @@ export default class CreatePopup extends React.Component{
 
   renderHooks() {
     var hookList = []
+    var numElements = this.state.hooks
+    if (this.props.selectedProduct != null) {
+      numElements = this.props.selectedProduct.hooks.length
+    }
 
-    for (var i = 0; i < this.state.hooks; i++) {
-      hookList.push(<Hook key = {i} productNames = {this.props.productNames}/>)
+    for (var i = 0; i < numElements; i++) {
+      hookList.push(<Hook id = {i} key = {i} productNames = {this.props.productNames} selectedProduct={this.props.selectedProduct}/>)
     }
 
     return hookList
@@ -97,7 +101,7 @@ export default class CreatePopup extends React.Component{
     return (
       <div class = "popup-wrapper">
         <div class = "popup">
-          <svg onClick = {this.hidePopup} xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
+          <svg onClick={this.hidePopup} xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
             <path d="M1.293 1.293a1 1 0 0 1 1.414 0L8 6.586l5.293-5.293a1 1 0 1 1 1.414 1.414L9.414 8l5.293 5.293a1 1 0 0 1-1.414 1.414L8 9.414l-5.293 5.293a1 1 0 0 1-1.414-1.414L6.586 8 1.293 2.707a1 1 0 0 1 0-1.414z"/>
           </svg>
           <h1 class = "text-center">Create Tracker</h1>
@@ -105,15 +109,15 @@ export default class CreatePopup extends React.Component{
             <Row>
               <Col md = {8}>
                 <Form.Label>Name</Form.Label>
-                <Form.Control className = "popup-form" type="text" placeholder="Enter name" />
+                <Form.Control className = "popup-form" type="text" value={this.props.selectedProduct != null ? this.props.selectedProduct.name : ''} placeholder="Enter name" />
               </Col>
               <Col md = {4}>
                 <Form.Label>Starting Quantity</Form.Label>
-                <Form.Control className = "popup-form" type="number" placeholder="Enter Number" />
+                <Form.Control className = "popup-form" type="number" value={this.props.selectedProduct != null ? this.props.selectedProduct.qty : ''} placeholder="Enter Number" />
               </Col>
             </Row>
             <Form.Label>Amazon Link</Form.Label>
-            <Form.Control className = "popup-form" type="text" placeholder="Enter Link" />
+            <Form.Control className = "popup-form" type="text" value={this.props.selectedProduct != null ? this.props.selectedProduct.link : ''} placeholder="Enter Link" />
           </Form>
 
           <div class = "hooks-header">
