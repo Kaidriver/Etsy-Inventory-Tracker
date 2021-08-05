@@ -27,6 +27,8 @@ class App extends React.Component {
     this.addProduct = this.addProduct.bind(this)
     this.deleteProduct = this.deleteProduct.bind(this)
     this.editProduct = this.editProduct.bind(this)
+    this.loadPopup = this.loadPopup.bind(this)
+    this.updateProduct = this.updateProduct.bind(this)
   }
 
   renderProducts() {
@@ -51,6 +53,17 @@ class App extends React.Component {
     })
   }
 
+  updateProduct(product) {
+    var index = this.state.productList.findIndex(item => item._id === product._id)
+    var copy = [...this.state.productList]
+
+    copy[index] = product
+    console.log(copy, index, product)
+    this.setState({
+      productList: copy
+    })
+  }
+
   deleteProduct(index) {
     axios.delete("http://localhost:5000/trackers/deleteTracker/" + this.state.productList[index]._id)
       .then(response => {
@@ -70,11 +83,19 @@ class App extends React.Component {
     document.querySelector('.popup-wrapper').style.display = "initial"
   }
 
+  loadPopup() {
+    this.setState({
+      selectedProduct: null
+    })
+
+    document.querySelector('.popup-wrapper').style.display = "initial"
+  }
+
   render() {
     return (
       <div>
-        <NavbarHead/>
-        <CreatePopup add = {this.addProduct} productNames = {this.state.productNames} selectedProduct = {this.state.selectedProduct}/>
+        <NavbarHead loadPopup = {this.loadPopup}/>
+        <CreatePopup add = {this.addProduct} productNames = {this.state.productNames} selectedProduct = {this.state.selectedProduct} updateProduct = {this.updateProduct}/>
 
         <Container>
           {this.renderProducts()}

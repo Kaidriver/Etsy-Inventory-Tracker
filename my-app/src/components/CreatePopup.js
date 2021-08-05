@@ -10,13 +10,13 @@ const Hook = (props) => {
   return (<Row>
     <Col md = {3}>
       <Form.Label>Product</Form.Label>
-      <Form.Select class="form-control" id="hooks-select" value={props.selectedProduct != null ? props.selectedProduct.hooks[props.id] : ''}>
+      <Form.Select class="form-control" id="hooks-select" defaultValue={props.selectedProduct != null ? props.selectedProduct.hooks[props.id] : ''}>
         {props.productNames.map(product => <option>{product}</option>)}
       </Form.Select>
     </Col>
     <Col md = {3}>
       <Form.Label>Loss per Order</Form.Label>
-      <Form.Control type="number" placeholder="Enter Number" id="losses-select" value={props.selectedProduct != null ? props.selectedProduct.losses[props.id] : ''}/>
+      <Form.Control type="number" placeholder="Enter Number" id="losses-select" defaultValue={props.selectedProduct != null ? props.selectedProduct.losses[props.id] : ''}/>
     </Col>
   </Row>)
 }
@@ -70,10 +70,19 @@ export default class CreatePopup extends React.Component{
     newTracker.lastUpdated = '08/02/2021'
     newTracker.date = '08/02/2021'
 
-    axios.post("http://localhost:5000/trackers/add", newTracker)
-      .then(res => newTracker._id = res.data)
+    if (this.props.selectedProduct == null) {
+      axios.post("http://localhost:5000/trackers/addTracker", newTracker)
+        .then(res => newTracker._id = res.data)
+      this.props.add(newTracker)
+    }
+    else {
+      newTracker._id = this.props.selectedProduct._id
 
-    this.props.add(newTracker)
+      axios.post("http://localhost:5000/trackers/updateTracker/" + this.props.selectedProduct._id, newTracker)
+        .then(res => console.log(res))
+      this.props.updateProduct(newTracker)
+    }
+
     this.hidePopup()
   }
 
@@ -104,20 +113,20 @@ export default class CreatePopup extends React.Component{
           <svg onClick={this.hidePopup} xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
             <path d="M1.293 1.293a1 1 0 0 1 1.414 0L8 6.586l5.293-5.293a1 1 0 1 1 1.414 1.414L9.414 8l5.293 5.293a1 1 0 0 1-1.414 1.414L8 9.414l-5.293 5.293a1 1 0 0 1-1.414-1.414L6.586 8 1.293 2.707a1 1 0 0 1 0-1.414z"/>
           </svg>
-          <h1 class = "text-center">Create Tracker</h1>
+          <h1 class = "text-center">{this.props.selectedProduct != null ? 'Edit Tracker' : 'Create Tracker'}</h1>
           <Form className = "pForm">
             <Row>
               <Col md = {8}>
                 <Form.Label>Name</Form.Label>
-                <Form.Control className = "popup-form" type="text" value={this.props.selectedProduct != null ? this.props.selectedProduct.name : ''} placeholder="Enter name" />
+                <Form.Control className = "popup-form" type="text" defaultValue={this.props.selectedProduct != null ? this.props.selectedProduct.name : ''} placeholder="Enter name" />
               </Col>
               <Col md = {4}>
                 <Form.Label>Starting Quantity</Form.Label>
-                <Form.Control className = "popup-form" type="number" value={this.props.selectedProduct != null ? this.props.selectedProduct.qty : ''} placeholder="Enter Number" />
+                <Form.Control className = "popup-form" type="number" defaultValue={this.props.selectedProduct != null ? this.props.selectedProduct.qty : ''} placeholder="Enter Number" />
               </Col>
             </Row>
             <Form.Label>Amazon Link</Form.Label>
-            <Form.Control className = "popup-form" type="text" value={this.props.selectedProduct != null ? this.props.selectedProduct.link : ''} placeholder="Enter Link" />
+            <Form.Control className = "popup-form" type="text" defaultValue={this.props.selectedProduct != null ? this.props.selectedProduct.link : ''} placeholder="Enter Link" />
           </Form>
 
           <div class = "hooks-header">
@@ -130,7 +139,7 @@ export default class CreatePopup extends React.Component{
             </form>
           </div>
 
-          <Button onClick = {this.createTracker} id = "create-tracker-btn">Create Tracker</Button>
+          <Button onClick = {this.createTracker} id = "create-tracker-btn">{this.props.selectedProduct != null ? 'Edit Tracker' : 'Create Tracker'}</Button>
         </div>
       </div>
     )
