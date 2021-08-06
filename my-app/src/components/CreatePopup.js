@@ -94,12 +94,8 @@ export default class CreatePopup extends React.Component{
 
   renderHooks() {
     var hookList = []
-    var numElements = this.state.hooks
-    if (this.props.selectedProduct != null) {
-      numElements = this.props.selectedProduct.hooks.length
-    }
 
-    for (var i = 0; i < numElements; i++) {
+    for (var i = 0; i < this.state.hooks; i++) {
       hookList.push(<Hook id = {i} key = {i} productNames = {this.props.productNames} selectedProduct={this.props.selectedProduct}/>)
     }
 
@@ -143,5 +139,14 @@ export default class CreatePopup extends React.Component{
         </div>
       </div>
     )
+  }
+
+  UNSAFE_componentWillReceiveProps(nextProps) {
+    if (nextProps.selectedProduct != null) {
+      console.log(nextProps.selectedProduct)
+      this.setState({
+        hooks: nextProps.selectedProduct.hooks.length
+      })
+    }
   }
 }
