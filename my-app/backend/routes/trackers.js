@@ -1,4 +1,5 @@
 const router = require('express').Router()
+const axios = require('axios')
 let Tracker = require('../models/tracker.model')
 
 module.exports = router
@@ -23,6 +24,13 @@ router.route('/addTracker').post((req, res) => {
   newTracker.save()
     .then(doc => res.json(doc._id))
     .catch(err => res.status(400).json('Error: ' + err));
+})
+
+router.route('/test').get((req, res) => {
+  axios.get("https://www.etsy.com/oauth/connect?response_type=code&client_id=lyms2hdybmhateqpeaijf81o&redirect_uri=https://ludicrouscreations.com/&scope=transactions_r&state=superstate&code_challenge=47DEQpj8HBSa-_TImW-5JCeuQeRkm5NMpJWZG3hSuFU&code_challenge_method=S256")
+    .then(response => {
+      console.log(response)
+    })
 })
 
 router.route('/getTrackers').get((req, res) => {

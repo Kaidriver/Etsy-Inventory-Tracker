@@ -20,6 +20,7 @@ class App extends React.Component {
     this.state = {
       productList: [],
       productNames: [],
+      productIds: [],
       selectedProduct: null
     }
 
@@ -95,7 +96,7 @@ class App extends React.Component {
     return (
       <div>
         <NavbarHead loadPopup = {this.loadPopup}/>
-        <CreatePopup add = {this.addProduct} productNames = {this.state.productNames} selectedProduct = {this.state.selectedProduct} updateProduct = {this.updateProduct}/>
+        <CreatePopup add = {this.addProduct} productNames = {this.state.productNames} productIds = {this.state.productIds} selectedProduct = {this.state.selectedProduct} updateProduct = {this.updateProduct}/>
 
         <Container>
           {this.renderProducts()}
@@ -108,8 +109,11 @@ class App extends React.Component {
     axios.get("http://localhost:5000/hooks/getProducts")
       .then(response => {
           this.setState({
-            productNames: response.data.map(product => product.title)
+            productNames: response.data.map(product => product.title),
+            productIds: response.data.map(product => product.listing_id)
           })
+
+          console.log(this.state.productIds)
       });
 
     axios.get("http://localhost:5000/trackers/getTrackers")
@@ -118,6 +122,7 @@ class App extends React.Component {
           productList: response.data
         })
       })
+
   }
 }
 

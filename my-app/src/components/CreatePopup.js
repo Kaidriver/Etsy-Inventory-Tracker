@@ -6,19 +6,71 @@ import Button from 'react-bootstrap/Button'
 import ReactDOM from 'react-dom'
 import axios from "axios";
 
-const Hook = (props) => {
-  return (<Row>
-    <Col md = {3}>
+class Hook extends React.Component {
+  constructor(props) {
+    super(props)
+
+    this.state = {
+      selectedId: props.productIds[0],
+      currentProperty: {}
+    }
+
+    this.displayProperties = this.displayProperties.bind(this)
+    this.renderHooks = this.renderHooks.bind(this)
+  }
+
+  displayProperties() {
+    this.setState({
+      selectedId: this.props.productIds[document.getElementById("hooks-select").selectedIndex]
+    })
+
+    axios.get("http://localhost:5000/hooks/getProperties/" + this.state.selectedId)
+      .then(response => {
+        this.setState({
+          currentProperty: response.data
+        })
+
+        console.log(this.state.currentProperty)
+      })
+  }
+
+  renderHooks() {
+    var hooks = []
+    hooks.push(<Col md = {3}>
       <Form.Label>Product</Form.Label>
-      <Form.Select class="form-control" id="hooks-select" defaultValue={props.selectedProduct != null ? props.selectedProduct.hooks[props.id] : ''}>
-        {props.productNames.map(product => <option>{product}</option>)}
+      <Form.Select onChange={this.displayProperties} class="form-control" id="hooks-select" defaultValue={this.props.selectedProduct != null ? this.props.selectedProduct.hooks[this.props.id] : ''}>
+        {this.props.productNames.map(product => <option>{product}</option>)}
       </Form.Select>
-    </Col>
-    <Col md = {3}>
+    </Col>)
+
+    var properties = this.state.currentProperty
+    var keys = Object.keys(properties)
+    console.log(keys)
+
+    for (var i = 0; i < keys.length; i++) {
+      hooks.push(<Col md = {1}>
+        <Form.Label>{keys[i]}</Form.Label>
+        <Form.Select onChange={this.displayProperties} class="form-control" id="hooks-select" defaultValue={this.props.selectedProduct != null ? this.props.selectedProduct.hooks[this.props.id] : ''}>
+          {properties[keys[i]].map(property => <option>{property}</option>)}
+        </Form.Select>
+      </Col>)
+    }
+
+    hooks.push(<Col md = {3}>
       <Form.Label>Loss per Order</Form.Label>
-      <Form.Control type="number" placeholder="Enter Number" id="losses-select" defaultValue={props.selectedProduct != null ? props.selectedProduct.losses[props.id] : ''}/>
-    </Col>
-  </Row>)
+      <Form.Control type="number" placeholder="Enter Number" id="losses-select" defaultValue={this.props.selectedProduct != null ? this.props.selectedProduct.losses[this.props.id] : ''}/>
+    </Col>)
+
+    return hooks
+  }
+
+  render() {
+    return (
+      <Row>
+        {this.renderHooks()}
+      </Row>
+    )
+  }
 }
 
 export default class CreatePopup extends React.Component{
@@ -96,7 +148,7 @@ export default class CreatePopup extends React.Component{
     var hookList = []
 
     for (var i = 0; i < this.state.hooks; i++) {
-      hookList.push(<Hook id = {i} key = {i} productNames = {this.props.productNames} selectedProduct={this.props.selectedProduct}/>)
+      hookList.push(<Hook id = {i} key = {i} productNames = {this.props.productNames} productIds = {this.props.productIds} selectedProduct={this.props.selectedProduct} displayProperties={this.displayProperties}/>)
     }
 
     return hookList
