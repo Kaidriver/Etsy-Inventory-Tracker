@@ -19,6 +19,10 @@ const trackerSchema = new Schema({
     type: [Number],
     required: true
   },
+  properties: {
+    type: [Object],
+    required: true
+  },
   link: {
     type: String,
     required: true

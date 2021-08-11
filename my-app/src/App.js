@@ -122,7 +122,6 @@ class App extends React.Component {
           productList: response.data
         })
       })
-
   }
 }
 

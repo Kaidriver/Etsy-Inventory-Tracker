@@ -11,26 +11,31 @@ class Hook extends React.Component {
     super(props)
 
     this.state = {
-      selectedId: props.productIds[0],
-      currentProperty: {}
+      currentProperty: {},
+      loaded: false
+    }
+
+    if (this.props.productIds[0] != null) {
+      axios.get("http://localhost:5000/hooks/getProperties/" + this.props.productIds[0])
+        .then(response => {
+          this.setState({
+            currentProperty: response.data,
+            loaded: true
+          })
+        })
     }
 
     this.displayProperties = this.displayProperties.bind(this)
     this.renderHooks = this.renderHooks.bind(this)
   }
 
-  displayProperties() {
-    this.setState({
-      selectedId: this.props.productIds[document.getElementById("hooks-select").selectedIndex]
-    })
-
-    axios.get("http://localhost:5000/hooks/getProperties/" + this.state.selectedId)
+  displayProperties(event) {
+    console.log(event)
+    axios.get("http://localhost:5000/hooks/getProperties/" + this.props.productIds[event.target.selectedIndex])
       .then(response => {
         this.setState({
           currentProperty: response.data
         })
-
-        console.log(this.state.currentProperty)
       })
   }
 
@@ -48,28 +53,47 @@ class Hook extends React.Component {
     console.log(keys)
 
     for (var i = 0; i < keys.length; i++) {
-      hooks.push(<Col md = {1}>
-        <Form.Label>{keys[i]}</Form.Label>
-        <Form.Select onChange={this.displayProperties} class="form-control" id="hooks-select" defaultValue={this.props.selectedProduct != null ? this.props.selectedProduct.hooks[this.props.id] : ''}>
+      hooks.push(<Col md = {3}>
+        <Form.Label id = "property-select">{keys[i]}</Form.Label>
+        <Form.Select class="form-control" id = "property-select" defaultValue={this.props.selectedProduct != null ? this.props.selectedProduct.hooks[this.props.id] : ''}>
           {properties[keys[i]].map(property => <option>{property}</option>)}
         </Form.Select>
       </Col>)
     }
-
     hooks.push(<Col md = {3}>
-      <Form.Label>Loss per Order</Form.Label>
-      <Form.Control type="number" placeholder="Enter Number" id="losses-select" defaultValue={this.props.selectedProduct != null ? this.props.selectedProduct.losses[this.props.id] : ''}/>
+      <Form.Label class = "end" id = "property-select">Loss per Order</Form.Label>
+      <Form.Control id = "property-select" type="number" placeholder="Enter Number" class="losses-select" defaultValue={this.props.selectedProduct != null ? this.props.selectedProduct.losses[this.props.id] : ''}/>
     </Col>)
 
-    return hooks
+    const noRows = Math.ceil(hooks.length / 4);
+
+    return Array.from(Array(noRows)).map((n, i) => (
+      <Row>
+       {hooks.slice(i* 4, (i + 1)* 4)}
+      </Row>
+    ));
   }
 
   render() {
+    console.log(this.state.loaded)
     return (
-      <Row>
+      <div>
         {this.renderHooks()}
-      </Row>
+      </div>
     )
+  }
+
+  UNSAFE_componentWillReceiveProps(nextProps) {
+    if (!this.state.loaded) {
+      console.log("http://localhost:5000/hooks/getProperties/" + nextProps.productIds[0])
+      axios.get("http://localhost:5000/hooks/getProperties/" + nextProps.productIds[0])
+        .then(response => {
+          this.setState({
+            currentProperty: response.data,
+            loaded: true
+          })
+        })
+    }
   }
 }
 
@@ -116,8 +140,24 @@ export default class CreatePopup extends React.Component{
     }
 
     newTracker.hooks = Array.from(document.querySelectorAll('#hooks-select')).map(hook => hook.value)
-    newTracker.losses = Array.from(document.querySelectorAll('#losses-select')).map(loss => loss.value)
+    newTracker.losses = Array.from(document.querySelectorAll('.losses-select')).map(loss => loss.value)
 
+    var properties = []
+    var propertyList = document.querySelectorAll('#property-select')
+    var property = {}
+    for (var i = 0; i < propertyList.length; i += 2) {
+
+      if (propertyList[i].classList.contains("end")) {
+
+        properties.push(property)
+        property = {}
+      }
+      else {
+        property[propertyList[i].innerText] = propertyList[i + 1].value
+      }
+    }
+
+    newTracker.properties = properties
     //temporary
     newTracker.lastUpdated = '08/02/2021'
     newTracker.date = '08/02/2021'

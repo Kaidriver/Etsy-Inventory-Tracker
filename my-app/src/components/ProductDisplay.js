@@ -5,7 +5,7 @@ import Button from 'react-bootstrap/Button'
 export default class ProductDisplay extends React.Component {
   constructor(props) {
     super(props)
-
+    
     this.deleteHook = this.deleteHook.bind(this)
     this.populateInfo = this.populateInfo.bind(this)
   }
