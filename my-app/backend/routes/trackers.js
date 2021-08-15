@@ -1,6 +1,7 @@
 const router = require('express').Router()
 const axios = require('axios')
 let Tracker = require('../models/tracker.model')
+let GlobalDocument = require('../models/global.model')
 
 module.exports = router
 
@@ -28,7 +29,54 @@ router.route('/addTracker').post((req, res) => {
     .catch(err => res.status(400).json('Error: ' + err));
 })
 
-router.route('/getTrackers').get((req, res) => {
+router.route('/getTrackers').get(async (req, res) => {
+
+  var result = await GlobalDocument.findOne()
+  console.log(result)
+
+  if (result == null) {
+    var lastUpdated = new Date().getTime()
+    const newGlobal = new GlobalDocument({
+      lastUpdated
+    })
+
+    await newGlobal.save()
+  }
+
+  var receipts = await axios.get("https://openapi.etsy.com/v3/application/shops/{shop_id}/transactions?shop_id=16865070&limit=5", {
+    headers: {
+      'x-api-key': 'lyms2hdybmhateqpeaijf81o',
+      'Authorization': 'Bearer 136313404.WhC2BMdzbmaK9wuh_MsyKiVVEWoogxzM9EUzaHyqllrohjXNB8plrl8_UTRpHssIrGqWVI7ghZ87Id4cDQaoI6ctY6'
+    }
+  })
+
+  var trackers = await Tracker.find()
+
+  await receipts.data.results.forEach(async receipt => {
+    var response = await axios.get("https://openapi.etsy.com/v3/application/listings/{listing_id}/inventory/products/{product_id}?listing_id=" + receipt.listing_id + "&product_id=" + receipt.product_id, {
+      headers: {
+        'x-api-key': 'lyms2hdybmhateqpeaijf81o',
+        'Authorization': 'Bearer 136313404.WhC2BMdzbmaK9wuh_MsyKiVVEWoogxzM9EUzaHyqllrohjXNB8plrl8_UTRpHssIrGqWVI7ghZ87Id4cDQaoI6ctY6'
+      }
+    })
+
+    var productProps = {}
+    response.data.property_values.forEach(property => productProps[property.property_name] = property.values[0])
+
+    trackers.forEach(async tracker => {
+      var index = tracker.hooks.indexOf(receipt.title)
+
+      if (index != -1 && JSON.stringify(tracker.properties[index]) === JSON.stringify(productProps)) {
+        console.log(tracker.losses[index])
+        tracker.qty = tracker.qty - tracker.losses[index]
+
+        await tracker.save()
+          .then(() => console.log("Saved!"))
+          .catch(err => console.log(err));
+      }
+    })
+  })
+
   Tracker.find()
     .then(trackers => res.json(trackers))
     .catch(err => res.status(400).json('Error: ' + err));
@@ -48,7 +96,7 @@ router.route('/updateTracker/:id').post((req, res) => {
       tracker.hooks = req.body.hooks
       tracker.losses = req.body.losses
       tracker.link = req.body.link
-      tracker.date = req.body.lastUpdated
+      tracker.lastUpdated = req.body.lastUpdated
 
       tracker.save()
         .then(() => res.json('Tracker updated!'))

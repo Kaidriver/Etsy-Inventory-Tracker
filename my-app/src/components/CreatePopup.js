@@ -19,8 +19,7 @@ class Hook extends React.Component {
       axios.get("http://localhost:5000/hooks/getProperties/" + this.props.productIds[0])
         .then(response => {
           this.setState({
-            currentProperty: response.data,
-            loaded: true
+            currentProperty: response.data
           })
         })
     }
@@ -55,14 +54,14 @@ class Hook extends React.Component {
     for (var i = 0; i < keys.length; i++) {
       hooks.push(<Col md = {3}>
         <Form.Label id = "property-select">{keys[i]}</Form.Label>
-        <Form.Select class="form-control" id = "property-select" defaultValue={this.props.selectedProduct != null ? this.props.selectedProduct.hooks[this.props.id] : ''}>
+        <Form.Select id = "property-select" defaultValue={this.props.selectedProduct != null ? this.props.selectedProduct.hooks[this.props.id] : ''}>
           {properties[keys[i]].map(property => <option>{property}</option>)}
         </Form.Select>
       </Col>)
     }
     hooks.push(<Col md = {3}>
-      <Form.Label class = "end" id = "property-select">Loss per Order</Form.Label>
-      <Form.Control id = "property-select" type="number" placeholder="Enter Number" class="losses-select" defaultValue={this.props.selectedProduct != null ? this.props.selectedProduct.losses[this.props.id] : ''}/>
+      <Form.Label className = "end" id = "property-select">Loss per Order</Form.Label>
+      <Form.Control id = "property-select" type="number" placeholder="Enter Number" className="losses-select" defaultValue={this.props.selectedProduct != null ? this.props.selectedProduct.losses[this.props.id] : ''}/>
     </Col>)
 
     const noRows = Math.ceil(hooks.length / 4);
@@ -75,7 +74,6 @@ class Hook extends React.Component {
   }
 
   render() {
-    console.log(this.state.loaded)
     return (
       <div>
         {this.renderHooks()}
@@ -84,7 +82,7 @@ class Hook extends React.Component {
   }
 
   UNSAFE_componentWillReceiveProps(nextProps) {
-    if (!this.state.loaded) {
+    if (this.props.productIds.length == 0) {
       console.log("http://localhost:5000/hooks/getProperties/" + nextProps.productIds[0])
       axios.get("http://localhost:5000/hooks/getProperties/" + nextProps.productIds[0])
         .then(response => {
