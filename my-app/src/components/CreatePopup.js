@@ -12,11 +12,12 @@ class Hook extends React.Component {
 
     this.state = {
       currentProperty: {},
+      currentName: props.selectedProduct != null ? props.selectedProduct.hooks[props.id] : '',
       loaded: false
     }
 
     if (this.props.productIds[0] != null) {
-      axios.get("http://localhost:5000/hooks/getProperties/" + this.props.productIds[0])
+      axios.get("http://localhost:5000/hooks/getProperties/" + (this.props.selectedProduct != null && this.props.selectedProduct.properties[this.props.id] != null ? this.props.productIds[this.props.productNames.indexOf(this.props.selectedProduct.hooks[this.props.id])] : this.props.productIds[0]))
         .then(response => {
           this.setState({
             currentProperty: response.data
@@ -29,7 +30,9 @@ class Hook extends React.Component {
   }
 
   displayProperties(event) {
-    console.log(event)
+    this.setState({
+      currentName: event.target.value
+    })
     axios.get("http://localhost:5000/hooks/getProperties/" + this.props.productIds[event.target.selectedIndex])
       .then(response => {
         this.setState({
@@ -40,22 +43,30 @@ class Hook extends React.Component {
 
   renderHooks() {
     var hooks = []
+
+
     hooks.push(<Col md = {3}>
       <Form.Label>Product</Form.Label>
-      <Form.Select onChange={this.displayProperties} class="form-control" id="hooks-select" defaultValue={this.props.selectedProduct != null ? this.props.selectedProduct.hooks[this.props.id] : ''}>
+      <Form.Select onChange={this.displayProperties} class="form-control" id="hooks-select" value={this.state.currentName}>
         {this.props.productNames.map(product => <option>{product}</option>)}
       </Form.Select>
     </Col>)
 
     var properties = this.state.currentProperty
     var keys = Object.keys(properties)
-    console.log(keys)
 
     for (var i = 0; i < keys.length; i++) {
+      var selections = properties[keys[i]].map(property => <option>{property}</option>)
+
+      if (this.props.selectedProduct != null && this.props.selectedProduct.properties[this.props.id] != null) {
+        selections = selections.filter(option => option.props.children != this.props.selectedProduct.properties[this.props.id][keys[i]])
+        selections.unshift(<option>{this.props.selectedProduct.properties[this.props.id][keys[i]]}</option>)
+      }
+
       hooks.push(<Col md = {3}>
         <Form.Label id = "property-select">{keys[i]}</Form.Label>
-        <Form.Select id = "property-select" defaultValue={this.props.selectedProduct != null ? this.props.selectedProduct.hooks[this.props.id] : ''}>
-          {properties[keys[i]].map(property => <option>{property}</option>)}
+        <Form.Select id = "property-select">
+          {selections}
         </Form.Select>
       </Col>)
     }
@@ -82,16 +93,15 @@ class Hook extends React.Component {
   }
 
   UNSAFE_componentWillReceiveProps(nextProps) {
-    if (this.props.productIds.length == 0) {
-      console.log("http://localhost:5000/hooks/getProperties/" + nextProps.productIds[0])
-      axios.get("http://localhost:5000/hooks/getProperties/" + nextProps.productIds[0])
-        .then(response => {
-          this.setState({
-            currentProperty: response.data,
-            loaded: true
-          })
+    axios.get("http://localhost:5000/hooks/getProperties/" + (nextProps.selectedProduct != null && nextProps.selectedProduct.properties[nextProps.id] != null ? nextProps.productIds[nextProps.productNames.indexOf(nextProps.selectedProduct.hooks[nextProps.id])] : nextProps.productIds[0]))
+      .then(response => {
+        console.log(response.data)
+        this.setState({
+          currentProperty: response.data,
+          currentName: nextProps.selectedProduct != null ? nextProps.selectedProduct.hooks[nextProps.id] : '',
+          loaded: true
         })
-    }
+      })
   }
 }
 
@@ -168,6 +178,7 @@ export default class CreatePopup extends React.Component{
     else {
       newTracker._id = this.props.selectedProduct._id
 
+      console.log(newTracker)
       axios.post("http://localhost:5000/trackers/updateTracker/" + this.props.selectedProduct._id, newTracker)
         .then(res => console.log(res))
       this.props.updateProduct(newTracker)
