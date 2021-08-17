@@ -32,7 +32,6 @@ router.route('/addTracker').post((req, res) => {
 router.route('/getTrackers').get(async (req, res) => {
 
   var result = await GlobalDocument.findOne()
-  console.log(result)
 
   if (result == null) {
     var lastUpdated = new Date().getTime()
@@ -41,22 +40,24 @@ router.route('/getTrackers').get(async (req, res) => {
     })
 
     await newGlobal.save()
+    result = newGlobal
   }
 
   var receipts = await axios.get("https://openapi.etsy.com/v3/application/shops/{shop_id}/transactions?shop_id=16865070&limit=5", {
     headers: {
       'x-api-key': 'lyms2hdybmhateqpeaijf81o',
-      'Authorization': 'Bearer 136313404.zUPwxEd7VWXBZCpgel9XfLtejdixfMkxCMCqKIloYztSPxF7LzXv8kexd26XqIk-FNnlC71C6M-x4ypApxC1QVgS6-'
+      'Authorization': 'Bearer 136313404.tSJ7KgkL970pglI5o9f8M65O9RyrN1dSsYv86Z4mkJtDkmO9CX_PDi7bR08CvwEMabcMKhk6mMuHQ_B-FM93Q8djXW'
     }
   })
 
+  receipts = receipts.data.results.filter(receipt => receipt.create_timestamp >= result.lastUpdated)
   var trackers = await Tracker.find()
 
-  for (var receipt of receipts.data.results) {
+  for (var receipt of receipts) {
     var response = await axios.get("https://openapi.etsy.com/v3/application/listings/{listing_id}/inventory/products/{product_id}?listing_id=" + receipt.listing_id + "&product_id=" + receipt.product_id, {
       headers: {
         'x-api-key': 'lyms2hdybmhateqpeaijf81o',
-        'Authorization': 'Bearer 136313404.zUPwxEd7VWXBZCpgel9XfLtejdixfMkxCMCqKIloYztSPxF7LzXv8kexd26XqIk-FNnlC71C6M-x4ypApxC1QVgS6-'
+        'Authorization': 'Bearer 136313404.tSJ7KgkL970pglI5o9f8M65O9RyrN1dSsYv86Z4mkJtDkmO9CX_PDi7bR08CvwEMabcMKhk6mMuHQ_B-FM93Q8djXW'
       }
     })
 
@@ -76,6 +77,10 @@ router.route('/getTrackers').get(async (req, res) => {
       }
     }
   }
+
+  result.lastUpdated = new Date().getTime()
+  result.save()
+    .then(response => console.log("Date saved!"))
 
   Tracker.find()
     .then(trackers => res.json(trackers))
