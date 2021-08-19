@@ -57,7 +57,8 @@ class Hook extends React.Component {
 
     for (var i = 0; i < keys.length; i++) {
       var selections = properties[keys[i]].map(property => <option>{property}</option>)
-
+      selections.unshift(<option>{'Any'}</option>)
+      
       if (this.props.selectedProduct != null && this.props.selectedProduct.properties[this.props.id] != null) {
         selections = selections.filter(option => option.props.children != this.props.selectedProduct.properties[this.props.id][keys[i]])
         selections.unshift(<option>{this.props.selectedProduct.properties[this.props.id][keys[i]]}</option>)

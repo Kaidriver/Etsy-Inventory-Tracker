@@ -5,6 +5,20 @@ let GlobalDocument = require('../models/global.model')
 
 module.exports = router
 
+function arePropertiesEqual(savedTracker, prodProperties) {
+
+  var savedKeys = Object.keys(savedTracker)
+
+  for (var i = 0; i < savedKeys.length; i++) {
+    if (savedTracker[savedKeys[i]] != "Any" && prodProperties[savedKeys[i]] != savedTracker[savedKeys[i]]) {
+      console.log("FALSE")
+      return false;
+    }
+  }
+
+  return true;
+}
+
 router.route('/addTracker').post((req, res) => {
   const name = req.body.name
   const qty = Number(req.body.qty)
@@ -46,18 +60,19 @@ router.route('/getTrackers').get(async (req, res) => {
   var receipts = await axios.get("https://openapi.etsy.com/v3/application/shops/{shop_id}/transactions?shop_id=16865070&limit=5", {
     headers: {
       'x-api-key': 'lyms2hdybmhateqpeaijf81o',
-      'Authorization': 'Bearer 136313404.tSJ7KgkL970pglI5o9f8M65O9RyrN1dSsYv86Z4mkJtDkmO9CX_PDi7bR08CvwEMabcMKhk6mMuHQ_B-FM93Q8djXW'
+      'Authorization': 'Bearer 136313404.I7vMgVz1jjVFFzFOH8IFe50mgcQ2xFvJZi6bnxMjYcTXAm2I3NE-GsJ15J63hnH6wGvSPEzkATRjuufejyBxyDs9Y0'
     }
   })
 
-  receipts = receipts.data.results.filter(receipt => receipt.create_timestamp >= result.lastUpdated)
+  receipts = receipts.data.results
+  // .filter(receipt => receipt.create_timestamp >= result.lastUpdated)
   var trackers = await Tracker.find()
 
   for (var receipt of receipts) {
     var response = await axios.get("https://openapi.etsy.com/v3/application/listings/{listing_id}/inventory/products/{product_id}?listing_id=" + receipt.listing_id + "&product_id=" + receipt.product_id, {
       headers: {
         'x-api-key': 'lyms2hdybmhateqpeaijf81o',
-        'Authorization': 'Bearer 136313404.tSJ7KgkL970pglI5o9f8M65O9RyrN1dSsYv86Z4mkJtDkmO9CX_PDi7bR08CvwEMabcMKhk6mMuHQ_B-FM93Q8djXW'
+        'Authorization': 'Bearer 136313404.I7vMgVz1jjVFFzFOH8IFe50mgcQ2xFvJZi6bnxMjYcTXAm2I3NE-GsJ15J63hnH6wGvSPEzkATRjuufejyBxyDs9Y0'
       }
     })
 
@@ -67,8 +82,7 @@ router.route('/getTrackers').get(async (req, res) => {
     for (var tracker of trackers) {
       var index = tracker.hooks.indexOf(receipt.title)
 
-      if (index != -1 && JSON.stringify(tracker.properties[index]) === JSON.stringify(productProps)) {
-        console.log(tracker.properties[index], JSON.stringify(productProps))
+      if (index != -1 && arePropertiesEqual(tracker.properties[index], productProps)) {
         tracker.qty = tracker.qty - tracker.losses[index]
 
         await tracker.save()
