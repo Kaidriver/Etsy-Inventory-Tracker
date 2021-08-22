@@ -58,7 +58,7 @@ class Hook extends React.Component {
     for (var i = 0; i < keys.length; i++) {
       var selections = properties[keys[i]].map(property => <option>{property}</option>)
       selections.unshift(<option>{'Any'}</option>)
-      
+
       if (this.props.selectedProduct != null && this.props.selectedProduct.properties[this.props.id] != null) {
         selections = selections.filter(option => option.props.children != this.props.selectedProduct.properties[this.props.id][keys[i]])
         selections.unshift(<option>{this.props.selectedProduct.properties[this.props.id][keys[i]]}</option>)
@@ -173,19 +173,24 @@ export default class CreatePopup extends React.Component{
 
     if (this.props.selectedProduct == null) {
       axios.post("http://localhost:5000/trackers/addTracker", newTracker)
-        .then(res => newTracker._id = res.data)
-      this.props.add(newTracker)
+        .then(res => {
+          newTracker._id = res.data._id
+          newTracker.imgSrc = res.data.src
+
+          this.props.add(newTracker)
+          this.hidePopup()
+        })
     }
     else {
       newTracker._id = this.props.selectedProduct._id
-
+      newTracker.imgSrc = this.props.selectedProduct.imgSrc
+      
       console.log(newTracker)
       axios.post("http://localhost:5000/trackers/updateTracker/" + this.props.selectedProduct._id, newTracker)
-        .then(res => console.log(res))
+        .then(res => {console.log(res)})
       this.props.updateProduct(newTracker)
+      this.hidePopup()
     }
-
-    this.hidePopup()
   }
 
   addHook() {

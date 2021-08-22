@@ -2,6 +2,7 @@ const router = require('express').Router()
 const axios = require('axios')
 let Tracker = require('../models/tracker.model')
 let GlobalDocument = require('../models/global.model')
+const puppeteer = require('puppeteer')
 
 module.exports = router
 
@@ -19,7 +20,23 @@ function arePropertiesEqual(savedTracker, prodProperties) {
   return true;
 }
 
-router.route('/addTracker').post((req, res) => {
+router.route('/addTracker').post(async (req, res) => {
+  var amazonURL = req.body.link
+  var browser = await puppeteer.launch()
+  var page = await browser.newPage()
+
+  await page.goto(amazonURL, {waitUntil: 'networkidle2'})
+
+  let src = await page.evaluate(() => {
+    let parseSrc = document.querySelector("#imgTagWrapperId img").src
+
+    return {
+      img: parseSrc
+    }
+  })
+
+  await browser.close()
+
   const name = req.body.name
   const qty = Number(req.body.qty)
   const hooks = req.body.hooks
@@ -27,6 +44,7 @@ router.route('/addTracker').post((req, res) => {
   const properties = req.body.properties
   const link = req.body.link
   const lastUpdated = req.body.lastUpdated
+  const imgSrc = src.img
 
   const newTracker = new Tracker({
     name,
@@ -35,11 +53,15 @@ router.route('/addTracker').post((req, res) => {
     losses,
     properties,
     link,
+    imgSrc,
     lastUpdated
   })
 
   newTracker.save()
-    .then(doc => res.json(doc._id))
+    .then(doc => res.json({
+      _id: doc._id,
+      src: imgSrc
+    }))
     .catch(err => res.status(400).json('Error: ' + err));
 })
 
@@ -60,7 +82,7 @@ router.route('/getTrackers').get(async (req, res) => {
   var receipts = await axios.get("https://openapi.etsy.com/v3/application/shops/{shop_id}/transactions?shop_id=16865070&limit=5", {
     headers: {
       'x-api-key': 'lyms2hdybmhateqpeaijf81o',
-      'Authorization': 'Bearer 136313404.I7vMgVz1jjVFFzFOH8IFe50mgcQ2xFvJZi6bnxMjYcTXAm2I3NE-GsJ15J63hnH6wGvSPEzkATRjuufejyBxyDs9Y0'
+      'Authorization': 'Bearer 136313404.x-koYPFubsODUI85cEmTB3NMaW7b2U_OFMim0-zoH-8fFYikDLmSNN5WuElPwf5JsWTbuLg3GGsobnKLHOnGIS9L5A'
     }
   })
 
@@ -72,7 +94,7 @@ router.route('/getTrackers').get(async (req, res) => {
     var response = await axios.get("https://openapi.etsy.com/v3/application/listings/{listing_id}/inventory/products/{product_id}?listing_id=" + receipt.listing_id + "&product_id=" + receipt.product_id, {
       headers: {
         'x-api-key': 'lyms2hdybmhateqpeaijf81o',
-        'Authorization': 'Bearer 136313404.I7vMgVz1jjVFFzFOH8IFe50mgcQ2xFvJZi6bnxMjYcTXAm2I3NE-GsJ15J63hnH6wGvSPEzkATRjuufejyBxyDs9Y0'
+        'Authorization': 'Bearer 136313404.x-koYPFubsODUI85cEmTB3NMaW7b2U_OFMim0-zoH-8fFYikDLmSNN5WuElPwf5JsWTbuLg3GGsobnKLHOnGIS9L5A'
       }
     })
 

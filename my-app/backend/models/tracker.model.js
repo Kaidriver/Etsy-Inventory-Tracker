@@ -27,6 +27,10 @@ const trackerSchema = new Schema({
     type: String,
     required: true
   },
+  imgSrc: {
+    type: String,
+    required: true
+  },
   lastUpdated: {
     type: String,
     required: true

@@ -16,7 +16,7 @@ router.route('/getProperties/:id').get((req, res) => {
   axios.get("https://openapi.etsy.com/v3/application/listings/{listing_id}/inventory?listing_id=" + req.params.id, {
     headers: {
       'x-api-key': 'lyms2hdybmhateqpeaijf81o',
-      'Authorization': 'Bearer 136313404.I7vMgVz1jjVFFzFOH8IFe50mgcQ2xFvJZi6bnxMjYcTXAm2I3NE-GsJ15J63hnH6wGvSPEzkATRjuufejyBxyDs9Y0'
+      'Authorization': 'Bearer 136313404.x-koYPFubsODUI85cEmTB3NMaW7b2U_OFMim0-zoH-8fFYikDLmSNN5WuElPwf5JsWTbuLg3GGsobnKLHOnGIS9L5A'
     }
   })
   .then(response => {

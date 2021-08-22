@@ -35,7 +35,7 @@ class App extends React.Component {
   renderProducts() {
     var products = []
     for (var i = 0; i < this.state.productList.length; i++) {
-      var product = <ProductDisplay id = {i} key={i} img={pla} name = {this.state.productList[i].name} qty = {this.state.productList[i].qty} date = {this.state.productList[i].date} delete = {this.deleteProduct} edit = {this.editProduct}/>
+      var product = <ProductDisplay id = {i} key={i} img={this.state.productList[i].imgSrc} name = {this.state.productList[i].name} qty = {this.state.productList[i].qty} date = {this.state.productList[i].date} delete = {this.deleteProduct} edit = {this.editProduct}/>
       products.push(product)
     }
 
