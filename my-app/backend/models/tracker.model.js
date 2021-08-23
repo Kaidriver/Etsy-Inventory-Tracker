@@ -31,7 +31,7 @@ const trackerSchema = new Schema({
     type: String,
     required: true
   },
-  lastUpdated: {
+  buyDate: {
     type: String,
     required: true
   }

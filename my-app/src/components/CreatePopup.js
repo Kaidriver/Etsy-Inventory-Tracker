@@ -139,7 +139,7 @@ export default class CreatePopup extends React.Component{
       this.resetPopup()
   }
 
-  createTracker() {
+  async createTracker() {
     var newTracker = {}
     var fieldNames = ["name", "qty", 'link']
     var fieldValues = document.querySelectorAll('.popup-form')
@@ -167,15 +167,13 @@ export default class CreatePopup extends React.Component{
     }
 
     newTracker.properties = properties
-    //temporary
-    newTracker.lastUpdated = '08/02/2021'
-    newTracker.date = '08/02/2021'
 
     if (this.props.selectedProduct == null) {
       axios.post("http://localhost:5000/trackers/addTracker", newTracker)
         .then(res => {
           newTracker._id = res.data._id
           newTracker.imgSrc = res.data.src
+          newTracker.buyDate = res.data.buyDate
 
           this.props.add(newTracker)
           this.hidePopup()
@@ -184,10 +182,9 @@ export default class CreatePopup extends React.Component{
     else {
       newTracker._id = this.props.selectedProduct._id
       newTracker.imgSrc = this.props.selectedProduct.imgSrc
-      
-      console.log(newTracker)
-      axios.post("http://localhost:5000/trackers/updateTracker/" + this.props.selectedProduct._id, newTracker)
-        .then(res => {console.log(res)})
+
+      var result = await axios.post("http://localhost:5000/trackers/updateTracker/" + this.props.selectedProduct._id, newTracker)
+      newTracker.buyDate = result.data.buyDate
       this.props.updateProduct(newTracker)
       this.hidePopup()
     }
