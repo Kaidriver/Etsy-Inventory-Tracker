@@ -94,15 +94,17 @@ class Hook extends React.Component {
   }
 
   UNSAFE_componentWillReceiveProps(nextProps) {
-    axios.get("http://localhost:5000/hooks/getProperties/" + (nextProps.selectedProduct != null && nextProps.selectedProduct.properties[nextProps.id] != null ? nextProps.productIds[nextProps.productNames.indexOf(nextProps.selectedProduct.hooks[nextProps.id])] : nextProps.productIds[0]))
-      .then(response => {
-        console.log(response.data)
-        this.setState({
-          currentProperty: response.data,
-          currentName: nextProps.selectedProduct != null ? nextProps.selectedProduct.hooks[nextProps.id] : '',
-          loaded: true
+    if (this.props.productNames.length == 0) {
+      axios.get("http://localhost:5000/hooks/getProperties/" + (nextProps.selectedProduct != null && nextProps.selectedProduct.properties[nextProps.id] != null ? nextProps.productIds[nextProps.productNames.indexOf(nextProps.selectedProduct.hooks[nextProps.id])] : nextProps.productIds[0]))
+        .then(response => {
+          console.log(response.data)
+          this.setState({
+            currentProperty: response.data,
+            currentName: nextProps.selectedProduct != null ? nextProps.selectedProduct.hooks[nextProps.id] : '',
+            loaded: true
+          })
         })
-      })
+    }
   }
 }
 
