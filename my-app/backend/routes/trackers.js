@@ -26,7 +26,7 @@ async function calculateLoss(tracker, receipts) {
     var response = await axios.get("https://openapi.etsy.com/v3/application/listings/{listing_id}/inventory/products/{product_id}?listing_id=" + receipt.listing_id + "&product_id=" + receipt.product_id, {
       headers: {
         'x-api-key': 'lyms2hdybmhateqpeaijf81o',
-        'Authorization': 'Bearer 136313404._EfnzywXC9Hiy3CVisME2U8qXpzXieWaF53a3moGcVdN-TpDA10BSNVvAl2vUXqfdT9ELSAAQX7GjNDYXqM673gkK_'
+        'Authorization': process.env.ETSY_API_KEY
       }
     })
 
@@ -52,7 +52,7 @@ async function getBuyDate(tracker) {
     var receipts = await axios.get("https://openapi.etsy.com/v3/application/shops/{shop_id}/transactions?shop_id=16865070&limit=100", {
       headers: {
         'x-api-key': 'lyms2hdybmhateqpeaijf81o',
-        'Authorization': 'Bearer 136313404._EfnzywXC9Hiy3CVisME2U8qXpzXieWaF53a3moGcVdN-TpDA10BSNVvAl2vUXqfdT9ELSAAQX7GjNDYXqM673gkK_'
+        'Authorization': process.env.ETSY_API_KEY
       }
     })
 
@@ -187,7 +187,7 @@ router.route('/getTrackers').get(async (req, res) => {
   var receipts = await axios.get("https://openapi.etsy.com/v3/application/shops/{shop_id}/transactions?shop_id=16865070&limit=5", {
     headers: {
       'x-api-key': 'lyms2hdybmhateqpeaijf81o',
-      'Authorization': 'Bearer 136313404._EfnzywXC9Hiy3CVisME2U8qXpzXieWaF53a3moGcVdN-TpDA10BSNVvAl2vUXqfdT9ELSAAQX7GjNDYXqM673gkK_'
+      'Authorization': process.env.ETSY_API_KEY
     }
   })
 
