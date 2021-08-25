@@ -138,10 +138,13 @@ export default class CreatePopup extends React.Component{
 
   hidePopup() {
       document.querySelector('.popup-wrapper').style.display = "none"
+      document.querySelector("body").style.overflow = "visible";
       this.resetPopup()
   }
 
   async createTracker() {
+    document.querySelector('.loading-wrapper').style.display = "initial"
+
     var newTracker = {}
     var fieldNames = ["name", "qty", 'link']
     var fieldValues = document.querySelectorAll('.popup-form')
@@ -178,6 +181,8 @@ export default class CreatePopup extends React.Component{
           newTracker.buyDate = res.data.buyDate
 
           this.props.add(newTracker)
+
+          document.querySelector('.loading-wrapper').style.display = "none"
           this.hidePopup()
         })
     }
@@ -188,6 +193,8 @@ export default class CreatePopup extends React.Component{
       var result = await axios.post("http://localhost:5000/trackers/updateTracker/" + this.props.selectedProduct._id, newTracker)
       newTracker.buyDate = result.data.buyDate
       this.props.updateProduct(newTracker)
+
+      document.querySelector('.loading-wrapper').style.display = "none"
       this.hidePopup()
     }
   }
@@ -211,6 +218,9 @@ export default class CreatePopup extends React.Component{
   render() {
     return (
       <div class = "popup-wrapper">
+        <div class = "loading-wrapper">
+          <img src = "https://upload.wikimedia.org/wikipedia/commons/7/7d/Pedro_luis_romani_ruiz.gif" class = "popup-loading"></img>
+        </div>
         <div class = "popup">
           <svg onClick={this.hidePopup} xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
             <path d="M1.293 1.293a1 1 0 0 1 1.414 0L8 6.586l5.293-5.293a1 1 0 1 1 1.414 1.414L9.414 8l5.293 5.293a1 1 0 0 1-1.414 1.414L8 9.414l-5.293 5.293a1 1 0 0 1-1.414-1.414L6.586 8 1.293 2.707a1 1 0 0 1 0-1.414z"/>
@@ -248,6 +258,10 @@ export default class CreatePopup extends React.Component{
   }
 
   UNSAFE_componentWillReceiveProps(nextProps) {
+    if (document.querySelector('.popup-wrapper').style.display == "initial") {
+      document.querySelector("body").style.overflow = "hidden";
+    }
+    
     if (nextProps.selectedProduct != null) {
       console.log(nextProps.selectedProduct)
       this.setState({

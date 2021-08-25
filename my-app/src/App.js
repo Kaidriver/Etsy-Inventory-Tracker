@@ -20,7 +20,8 @@ class App extends React.Component {
       productList: [],
       productNames: [],
       productIds: [],
-      selectedProduct: null
+      selectedProduct: null,
+      loaded: false
     }
 
     this.renderProducts = this.renderProducts.bind(this)
@@ -94,10 +95,11 @@ class App extends React.Component {
   render() {
     return (
       <div>
-        <NavbarHead loadPopup = {this.loadPopup}/>
+        <NavbarHead loadPopup = {this.loadPopup} loaded = {this.state.loaded}/>
         <CreatePopup add = {this.addProduct} productNames = {this.state.productNames} productIds = {this.state.productIds} selectedProduct = {this.state.selectedProduct} updateProduct = {this.updateProduct}/>
 
         <Container>
+          <img src = "https://upload.wikimedia.org/wikipedia/commons/7/7d/Pedro_luis_romani_ruiz.gif" class = "loading"></img>
           {this.renderProducts()}
         </Container>
       </div>
@@ -117,8 +119,10 @@ class App extends React.Component {
 
     axios.get("http://localhost:5000/trackers/getTrackers")
       .then(response => {
+        document.querySelector(".loading").style.display = "none"
         this.setState({
-          productList: response.data
+          productList: response.data,
+          loaded: true
         })
       })
   }
