@@ -26,7 +26,7 @@ async function calculateLoss(tracker, receipts) {
     var response = await axios.get("https://openapi.etsy.com/v3/application/listings/{listing_id}/inventory/products/{product_id}?listing_id=" + receipt.listing_id + "&product_id=" + receipt.product_id, {
       headers: {
         'x-api-key': 'lyms2hdybmhateqpeaijf81o',
-        'Authorization': 'Bearer 136313404.BdfaCB0lJRvP0KYnoJyFGyzXuxwHavN8Hu_FeWPlq2YxYoNKmWLYe7F1Gk56YSe2zzHAo1nOWdAJ2NzbC3xpPIBJnY'
+        'Authorization': 'Bearer 136313404._EfnzywXC9Hiy3CVisME2U8qXpzXieWaF53a3moGcVdN-TpDA10BSNVvAl2vUXqfdT9ELSAAQX7GjNDYXqM673gkK_'
       }
     })
 
@@ -52,7 +52,7 @@ async function getBuyDate(tracker) {
     var receipts = await axios.get("https://openapi.etsy.com/v3/application/shops/{shop_id}/transactions?shop_id=16865070&limit=100", {
       headers: {
         'x-api-key': 'lyms2hdybmhateqpeaijf81o',
-        'Authorization': 'Bearer 136313404.BdfaCB0lJRvP0KYnoJyFGyzXuxwHavN8Hu_FeWPlq2YxYoNKmWLYe7F1Gk56YSe2zzHAo1nOWdAJ2NzbC3xpPIBJnY'
+        'Authorization': 'Bearer 136313404._EfnzywXC9Hiy3CVisME2U8qXpzXieWaF53a3moGcVdN-TpDA10BSNVvAl2vUXqfdT9ELSAAQX7GjNDYXqM673gkK_'
       }
     })
 
@@ -67,29 +67,75 @@ async function getBuyDate(tracker) {
     }
 
     var rate = totalLoss / (new Date().getTime() / 1000 - smallestTime)
-    var secondsLeft = tracker.qty / rate
+    var secondsLeft = rate != 0 ? tracker.qty / rate : 1210000
     var dateToBuy = new Date()
     dateToBuy.setSeconds(dateToBuy.getSeconds() + secondsLeft)
 
-    return dateToBuy.toLocaleDateString('en-US')
+    return dateToBuy
 }
 
-router.route('/addTracker').post(async (req, res) => {
-  var amazonURL = req.body.link
+async function scrapeInfo(link) {
+  var amazonURL = link
   var browser = await puppeteer.launch()
   var page = await browser.newPage()
 
   await page.goto(amazonURL, {waitUntil: 'networkidle2'})
 
   let src = await page.evaluate(() => {
+    var displacement = new Date()
+
     let parseSrc = document.querySelector("#imgTagWrapperId img").src
+    let fastShippingMsg = document.querySelector("#mir-layout-DELIVERY_BLOCK-slot-UPSELL b")
+    let slowShippingMsg = document.querySelector("#mir-layout-DELIVERY_BLOCK-slot-DELIVERY_MESSAGE b")
+    const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+
+    var shippingMsg = fastShippingMsg != null ? fastShippingMsg.innerText : slowShippingMsg.innerText
+    shippingMsg = shippingMsg.split(" ")
+
+    var index = -1
+    for (var msg of shippingMsg) {
+        var occurrence = MONTHS.indexOf(msg)
+
+        if (occurrence != -1) {
+          index = occurrence
+        }
+    }
+
+    if (index == -1) {
+      if (shippingMsg[0] == "Tomorrow") {
+        displacement.setDate(displacement.getDate() + 2)
+      }
+      else {
+        displacement.setDate(displacement.getDate() + 1)
+      }
+    }
+    else {
+      var numIndex = shippingMsg.indexOf(MONTHS[i])
+
+      for (var i = numIndex + 1; i < shippingMsg.length; i++) {
+        if (!isNaN(shippingMsg[i])) {
+          numIndex = i
+        }
+      }
+
+      displacement.setMonth(index)
+      displacement.setDate(shippingMsg[numIndex])
+    }
 
     return {
-      img: parseSrc
+      img: parseSrc,
+      shippingDate: displacement.getTime()
     }
   })
 
   await browser.close()
+
+  return src
+}
+
+router.route('/addTracker').post(async (req, res) => {
+
+  var src = await scrapeInfo(req.body.link)
 
   const name = req.body.name
   const qty = Number(req.body.qty)
@@ -111,8 +157,10 @@ router.route('/addTracker').post(async (req, res) => {
     buyDate
   })
 
-  newTracker.buyDate = await getBuyDate(newTracker)
+  var date = await getBuyDate(newTracker)
+  date.setMilliseconds(date.getMilliseconds() - (src.shippingDate - new Date().getTime()) - 86400000)
 
+  newTracker.buyDate = date.toLocaleDateString('en-US')
   newTracker.save()
     .then(doc => res.json({
       _id: doc._id,
@@ -139,7 +187,7 @@ router.route('/getTrackers').get(async (req, res) => {
   var receipts = await axios.get("https://openapi.etsy.com/v3/application/shops/{shop_id}/transactions?shop_id=16865070&limit=5", {
     headers: {
       'x-api-key': 'lyms2hdybmhateqpeaijf81o',
-      'Authorization': 'Bearer 136313404.BdfaCB0lJRvP0KYnoJyFGyzXuxwHavN8Hu_FeWPlq2YxYoNKmWLYe7F1Gk56YSe2zzHAo1nOWdAJ2NzbC3xpPIBJnY'
+      'Authorization': 'Bearer 136313404._EfnzywXC9Hiy3CVisME2U8qXpzXieWaF53a3moGcVdN-TpDA10BSNVvAl2vUXqfdT9ELSAAQX7GjNDYXqM673gkK_'
     }
   })
 
@@ -179,7 +227,13 @@ router.route('/updateTracker/:id').post((req, res) => {
       tracker.losses = req.body.losses
       tracker.properties = req.body.properties
       tracker.link = req.body.link
-      tracker.buyDate = await getBuyDate(tracker)
+
+      var src = await scrapeInfo(req.body.link)
+
+      var date = await getBuyDate(tracker)
+      date.setMilliseconds(date.getMilliseconds() - (src.shippingDate - new Date().getTime()) - 86400000)
+
+      tracker.buyDate = date.toLocaleDateString('en-US')
 
       tracker.save()
         .then(() => res.json({

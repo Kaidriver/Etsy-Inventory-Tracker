@@ -8,7 +8,6 @@ import ProductDisplay from './components/ProductDisplay.js'
 import NavbarHead from './components/NavbarHead.js'
 import CreatePopup from './components/CreatePopup.js'
 import 'bootstrap/dist/css/bootstrap.min.css';
-import pla from './images/pla.jpg'
 import axios from "axios";
 import React from "react";
 
