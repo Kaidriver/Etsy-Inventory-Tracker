@@ -44,7 +44,6 @@ class Hook extends React.Component {
   renderHooks() {
     var hooks = []
 
-
     hooks.push(<Col md = {3}>
       <Form.Label>Product</Form.Label>
       <Form.Select onChange={this.displayProperties} className="form-control hooks-field" id="hooks-select" value={this.state.currentName}>
@@ -71,6 +70,7 @@ class Hook extends React.Component {
         </Form.Select>
       </Col>)
     }
+
     hooks.push(<Col md = {3}>
       <Form.Label className = "end" id = "property-select">Loss per Order</Form.Label>
       <Form.Control id = "property-select" type="number" placeholder="Enter Number" className="losses-select hooks-field" defaultValue={this.props.selectedProduct != null ? this.props.selectedProduct.losses[this.props.id] : ''}/>
