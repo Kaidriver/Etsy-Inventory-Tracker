@@ -47,7 +47,7 @@ class Hook extends React.Component {
 
     hooks.push(<Col md = {3}>
       <Form.Label>Product</Form.Label>
-      <Form.Select onChange={this.displayProperties} class="form-control" id="hooks-select" value={this.state.currentName}>
+      <Form.Select onChange={this.displayProperties} className="form-control hooks-field" id="hooks-select" value={this.state.currentName}>
         {this.props.productNames.map(product => <option>{product}</option>)}
       </Form.Select>
     </Col>)
@@ -66,14 +66,14 @@ class Hook extends React.Component {
 
       hooks.push(<Col md = {3}>
         <Form.Label id = "property-select">{keys[i]}</Form.Label>
-        <Form.Select id = "property-select">
+        <Form.Select id = "property-select" className = "hooks-field">
           {selections}
         </Form.Select>
       </Col>)
     }
     hooks.push(<Col md = {3}>
       <Form.Label className = "end" id = "property-select">Loss per Order</Form.Label>
-      <Form.Control id = "property-select" type="number" placeholder="Enter Number" className="losses-select" defaultValue={this.props.selectedProduct != null ? this.props.selectedProduct.losses[this.props.id] : ''}/>
+      <Form.Control id = "property-select" type="number" placeholder="Enter Number" className="losses-select hooks-field" defaultValue={this.props.selectedProduct != null ? this.props.selectedProduct.losses[this.props.id] : ''}/>
     </Col>)
 
     const noRows = Math.ceil(hooks.length / 4);
@@ -123,6 +123,7 @@ export default class CreatePopup extends React.Component{
     this.createTracker = this.createTracker.bind(this)
     this.resetPopup = this.resetPopup.bind(this)
     this.renderHooks = this.renderHooks.bind(this)
+    this.validateFields = this.validateFields.bind(this)
   }
 
   resetPopup() {
@@ -143,59 +144,65 @@ export default class CreatePopup extends React.Component{
   }
 
   async createTracker() {
-    document.querySelector('.loading-wrapper').style.display = "initial"
 
-    var newTracker = {}
-    var fieldNames = ["name", "qty", 'link']
-    var fieldValues = document.querySelectorAll('.popup-form')
-
-    for (var i = 0; i < fieldNames.length; i++) {
-      newTracker[fieldNames[i]] = fieldValues[i].value
-    }
-
-    newTracker.hooks = Array.from(document.querySelectorAll('#hooks-select')).map(hook => hook.value)
-    newTracker.losses = Array.from(document.querySelectorAll('.losses-select')).map(loss => loss.value)
-
-    var properties = []
-    var propertyList = document.querySelectorAll('#property-select')
-    var property = {}
-    for (var i = 0; i < propertyList.length; i += 2) {
-
-      if (propertyList[i].classList.contains("end")) {
-
-        properties.push(property)
-        property = {}
-      }
-      else {
-        property[propertyList[i].innerText] = propertyList[i + 1].value
-      }
-    }
-
-    newTracker.properties = properties
-
-    if (this.props.selectedProduct == null) {
-      axios.post("http://localhost:5000/trackers/addTracker", newTracker)
-        .then(res => {
-          newTracker._id = res.data._id
-          newTracker.imgSrc = res.data.src
-          newTracker.buyDate = res.data.buyDate
-
-          this.props.add(newTracker)
-
-          document.querySelector('.loading-wrapper').style.display = "none"
-          this.hidePopup()
-        })
+    if (!this.validateFields()) {
+      alert("Please fill out all fields")
     }
     else {
-      newTracker._id = this.props.selectedProduct._id
-      newTracker.imgSrc = this.props.selectedProduct.imgSrc
+      document.querySelector('.loading-wrapper').style.display = "initial"
 
-      var result = await axios.post("http://localhost:5000/trackers/updateTracker/" + this.props.selectedProduct._id, newTracker)
-      newTracker.buyDate = result.data.buyDate
-      this.props.updateProduct(newTracker)
+      var newTracker = {}
+      var fieldNames = ["name", "qty", 'link']
+      var fieldValues = document.querySelectorAll('.popup-form')
 
-      document.querySelector('.loading-wrapper').style.display = "none"
-      this.hidePopup()
+      for (var i = 0; i < fieldNames.length; i++) {
+        newTracker[fieldNames[i]] = fieldValues[i].value
+      }
+
+      newTracker.hooks = Array.from(document.querySelectorAll('#hooks-select')).map(hook => hook.value)
+      newTracker.losses = Array.from(document.querySelectorAll('.losses-select')).map(loss => loss.value)
+
+      var properties = []
+      var propertyList = document.querySelectorAll('#property-select')
+      var property = {}
+      for (var i = 0; i < propertyList.length; i += 2) {
+
+        if (propertyList[i].classList.contains("end")) {
+
+          properties.push(property)
+          property = {}
+        }
+        else {
+          property[propertyList[i].innerText] = propertyList[i + 1].value
+        }
+      }
+
+      newTracker.properties = properties
+
+      if (this.props.selectedProduct == null) {
+        axios.post("http://localhost:5000/trackers/addTracker", newTracker)
+          .then(res => {
+            newTracker._id = res.data._id
+            newTracker.imgSrc = res.data.src
+            newTracker.buyDate = res.data.buyDate
+
+            this.props.add(newTracker)
+
+            document.querySelector('.loading-wrapper').style.display = "none"
+            this.hidePopup()
+          })
+      }
+      else {
+        newTracker._id = this.props.selectedProduct._id
+        newTracker.imgSrc = this.props.selectedProduct.imgSrc
+
+        var result = await axios.post("http://localhost:5000/trackers/updateTracker/" + this.props.selectedProduct._id, newTracker)
+        newTracker.buyDate = result.data.buyDate
+        this.props.updateProduct(newTracker)
+
+        document.querySelector('.loading-wrapper').style.display = "none"
+        this.hidePopup()
+      }
     }
   }
 
@@ -213,6 +220,24 @@ export default class CreatePopup extends React.Component{
     }
 
     return hookList
+  }
+
+  validateFields() {
+
+    var textFields = document.querySelectorAll(".popup-form")
+    for (var i = 0; i < textFields.length; i++) {
+      if (textFields[i].value == "") {
+        return false
+      }
+    }
+
+    var hookFields = document.querySelectorAll(".hooks-field")
+    for (var i = 0; i < hookFields.length; i++) {
+      if (hookFields[i].value == "") {
+        return false
+      }
+    }
+    return true
   }
 
   render() {
@@ -261,7 +286,7 @@ export default class CreatePopup extends React.Component{
     if (document.querySelector('.popup-wrapper').style.display == "initial") {
       document.querySelector("body").style.overflow = "hidden";
     }
-    
+
     if (nextProps.selectedProduct != null) {
       console.log(nextProps.selectedProduct)
       this.setState({

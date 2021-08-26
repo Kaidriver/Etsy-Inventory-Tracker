@@ -37,7 +37,7 @@ async function calculateLoss(tracker, receipts) {
 
     while (index != -1) {
       if (arePropertiesEqual(tracker.properties[index], productProps)) {
-        totalLoss += tracker.losses[index]
+        totalLoss += tracker.losses[index] * receipt.quantity
       }
 
       index = tracker.hooks.indexOf(receipt.title, index + 1)
