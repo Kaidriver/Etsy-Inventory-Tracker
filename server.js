@@ -26,6 +26,10 @@ const hooksRouter = require('./routes/hooks')
 app.use('/trackers', trackersRouter)
 app.use('/hooks', hooksRouter)
 
+if (process.env.NODE_ENV === "production") {
+    app.use(express.static('my-app/build'))
+}
+
 app.listen(port, () => {
   console.log(`Server is running on port: ${port}`);
 });
