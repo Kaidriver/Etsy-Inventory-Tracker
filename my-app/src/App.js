@@ -107,7 +107,7 @@ class App extends React.Component {
   }
 
   componentDidMount() {
-    axios.get("http://localhost:5000/hooks/getProducts")
+    axios.get("https://etsy-inventory-app.herokuapp.com/hooks/getProducts")
       .then(response => {
           this.setState({
             productNames: response.data.map(product => product.title),
@@ -117,7 +117,7 @@ class App extends React.Component {
           console.log(this.state.productIds)
       });
 
-    axios.get("http://localhost:5000/trackers/getTrackers")
+    axios.get("https://etsy-inventory-app.herokuapp.com/trackers/getTrackers")
       .then(response => {
         document.querySelector(".loading").style.display = "none"
         this.setState({
