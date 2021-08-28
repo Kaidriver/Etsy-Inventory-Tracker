@@ -17,7 +17,7 @@ class Hook extends React.Component {
     }
 
     if (this.props.productIds[0] != null) {
-      axios.get("http://localhost:5000/hooks/getProperties/" + (this.props.selectedProduct != null && this.props.selectedProduct.properties[this.props.id] != null ? this.props.productIds[this.props.productNames.indexOf(this.props.selectedProduct.hooks[this.props.id])] : this.props.productIds[0]))
+      axios.get("https://etsy-inventory-app.herokuapp.com/hooks/getProperties/" + (this.props.selectedProduct != null && this.props.selectedProduct.properties[this.props.id] != null ? this.props.productIds[this.props.productNames.indexOf(this.props.selectedProduct.hooks[this.props.id])] : this.props.productIds[0]))
         .then(response => {
           this.setState({
             currentProperty: response.data
@@ -33,7 +33,7 @@ class Hook extends React.Component {
     this.setState({
       currentName: event.target.value
     })
-    axios.get("http://localhost:5000/hooks/getProperties/" + this.props.productIds[event.target.selectedIndex])
+    axios.get("https://etsy-inventory-app.herokuapp.com/hooks/getProperties/" + this.props.productIds[event.target.selectedIndex])
       .then(response => {
         this.setState({
           currentProperty: response.data
@@ -95,7 +95,7 @@ class Hook extends React.Component {
 
   UNSAFE_componentWillReceiveProps(nextProps) {
     if (this.props.productNames.length == 0) {
-      axios.get("http://localhost:5000/hooks/getProperties/" + (nextProps.selectedProduct != null && nextProps.selectedProduct.properties[nextProps.id] != null ? nextProps.productIds[nextProps.productNames.indexOf(nextProps.selectedProduct.hooks[nextProps.id])] : nextProps.productIds[0]))
+      axios.get("https://etsy-inventory-app.herokuapp.com/hooks/getProperties/" + (nextProps.selectedProduct != null && nextProps.selectedProduct.properties[nextProps.id] != null ? nextProps.productIds[nextProps.productNames.indexOf(nextProps.selectedProduct.hooks[nextProps.id])] : nextProps.productIds[0]))
         .then(response => {
           console.log(response.data)
           this.setState({
@@ -180,7 +180,7 @@ export default class CreatePopup extends React.Component{
       newTracker.properties = properties
 
       if (this.props.selectedProduct == null) {
-        axios.post("http://localhost:5000/trackers/addTracker", newTracker)
+        axios.post("https://etsy-inventory-app.herokuapp.com/trackers/addTracker", newTracker)
           .then(res => {
             newTracker._id = res.data._id
             newTracker.imgSrc = res.data.src
@@ -196,7 +196,7 @@ export default class CreatePopup extends React.Component{
         newTracker._id = this.props.selectedProduct._id
         newTracker.imgSrc = this.props.selectedProduct.imgSrc
 
-        var result = await axios.post("http://localhost:5000/trackers/updateTracker/" + this.props.selectedProduct._id, newTracker)
+        var result = await axios.post("https://etsy-inventory-app.herokuapp.com/trackers/updateTracker/" + this.props.selectedProduct._id, newTracker)
         newTracker.buyDate = result.data.buyDate
         this.props.updateProduct(newTracker)
 
